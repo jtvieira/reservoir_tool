@@ -110,4 +110,5 @@ def main():
         drop_table(site_meta_data['names'][i]) #Don't want duplicate data every time we ingest. We will just drop the table every time we gather the data
         write_to_db(site_meta_data['names'][i], df)
 
-main()
+if __name__ == '__main__':
+    main()
