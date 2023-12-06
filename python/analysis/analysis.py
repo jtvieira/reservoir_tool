@@ -2,18 +2,48 @@ import pandas as pd
 import psycopg2
 from sklearn.svm import SVR
 from sklearn.preprocessing import MinMaxScaler
+import numpy as np
+import trainModels
+from sqlalchemy import create_engine
 
 reservoir = ''
 train_start_dt = '2010-01-01'
 test_start_dt = '2023-01-01'
 
+db_params = {
+    'user': '',
+    "host": '',
+    "dbname": 'postgres',
+    "port": '5432',
+    'password': ''
+    }
+
+def write_results_to_db(df):
+    connection_parts = ["postgresql://"]
+
+    if db_params["user"]:
+        connection_parts.append(db_params["user"])
+        if db_params["password"]:
+            connection_parts.append(f":{db_params['password']}")
+        connection_parts.append("@")
+
+    host_part = db_params["host"] if db_params["host"] else "localhost"
+    connection_parts.append(f"{host_part}:{db_params['port']}")
+
+    connection_parts.append(f"/{db_params['dbname']}")
+
+    connection_string = "".join(connection_parts)
+
+    # Create the engine
+    engine = create_engine(connection_string)
+
+    df.to_sql(f'{reservoir}_results', engine, index=False, if_exists='replace')
+
+
 def get_data(res):
     global reservoir
     reservoir = res
-    db_params = {
-        "dbname": 'postgres',
-        "port": '5432',
-    }
+    
 
     conn = psycopg2.connect(**db_params)
     cursor = conn.cursor()
@@ -66,11 +96,31 @@ def process_data(X_train, y_train, X_test, y_test):
     x_scaler = MinMaxScaler()
     y_scaler = MinMaxScaler()
 
+    X_test_values = X_test.values
+    X_test_values = x_scaler.fit_transform(X_test_values)
+
+    X_train_values = X_train.values
+    X_train_values = x_scaler.fit_transform(X_train_values)
+
+    y_train_values = y_train.values.reshape(-1, 1)
+    y_train_values = y_scaler.fit_transform(y_train_values)
+
+    y_test_values = y_test.values.reshape(-1, 1)
+    # y_test_values = y_scaler.fit_transform(y_test_values)
+
+    results = trainModels.train(X_train_values, y_train_values, X_test_values)
+    for k, _ in results.items():
+        results[k] = y_scaler.inverse_transform(results[k])
+    results['test'] = y_test_values
+    df = pd.DataFrame({k: v.flatten() for k, v in results.items()})
+    write_results_to_db(df)
+
 def main():
     df = get_data('mohave')
     df = add_14_days_data(df)
     X_train, y_train, X_test, y_test = generate_train_and_test_sets(df)
-    print(test.head())
+    process_data(X_train, y_train, X_test, y_test)
+    # print(test.head())
     # print(df.head())
     # print(train_start_dt)
 
