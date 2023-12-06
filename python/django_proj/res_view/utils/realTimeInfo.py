@@ -6,15 +6,8 @@ import plotly_express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.offline as pyo
-
-db_params = {
-    # "dbname": os.getenv('DB_NAME'),
-    # "host": os.getenv('HOST'),
-    # "port": os.getenv('PORT'),
-    "dbname": 'postgres',
-    # "host": 'postgres',
-    "port": '5432',
-}
+from dotenv import load_dotenv
+import os
 
 
 def create_df(lon, lat, site_no, edate):
@@ -42,6 +35,14 @@ def merge_data(storage_df, clim_df):
     return pd.merge(clim_df, storage_df, on='Date', how='inner')
 
 def get_storage_and_elevation_df_from_siteno(site_no):
+    load_dotenv()
+    db_params = {
+        'user': os.getenv('USER'),
+        "host": os.getenv('HOST'),
+        "dbname": os.getenv('DB_NAME'),
+        "port": os.getenv('PORT'),
+        'password': os.getenv('PASSWORD')
+    }
     conn = psycopg2.connect(**db_params)
     cursor = conn.cursor()
     query = f"SELECT datetime, storage, elevation FROM res_data WHERE site_no LIKE '{site_no}';"

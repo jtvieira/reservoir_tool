@@ -6,15 +6,9 @@ import psycopg2
 import plotly.graph_objects as go
 import plotly.offline as pyo
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+import os
 
-db_params = {
-    "dbname": 'postgres',
-    "port": '5432',
-}
-# print('MAPE for test data: ', mape(y_test_pred, y_test_values)*100, '%')
-# print('MAPE for training data: ', mape(y_train_pred, y_train_values)*100, '%')
-# print('MAE for test data: ', mae(y_test_pred, y_test_values))
-# print('MAE for training data: ', mae(y_train_pred, y_train_values))
 
 def get_data(df, col):
     pred = df[col].values
@@ -74,6 +68,15 @@ def generate_plot(df, col):
     return pyo.plot(fig, output_type='div')
 
 def get_df(res):
+    load_dotenv()
+    db_params = {
+        'user': os.getenv('USER'),
+        "host": os.getenv('HOST'),
+        "dbname": os.getenv('DB_NAME'),
+        "port": os.getenv('PORT'),
+        'password': os.getenv('PASSWORD')
+    }
+    
     table = f'{res}_results'
     conn = psycopg2.connect(**db_params)
     query = F'''SELECT * FROM {table};'''

@@ -2,16 +2,9 @@ import requests
 import json
 import pandas as pd
 import psycopg2
+from dotenv import load_dotenv
+import os
 
-
-db_params = {
-    # "dbname": os.getenv('DB_NAME'),
-    # "host": os.getenv('HOST'),
-    # "port": os.getenv('PORT'),
-    "dbname": 'postgres',
-    # "host": 'postgres',
-    "port": '5432',
-}
 
 # mohave lat = 35.19722105
 # mohave lon = -114.5694098
@@ -36,6 +29,14 @@ def get_clim_df(lon, lat, edate):
     return pd.DataFrame(res, columns=['Date', 'Avg Temp', 'Precip'])
 
 def get_storage_and_elevation_df_from_siteno(site_no):
+    load_dotenv()
+    db_params = {
+        'user': os.getenv('USER'),
+        "host": os.getenv('HOST'),
+        "dbname": os.getenv('DB_NAME'),
+        "port": os.getenv('PORT'),
+        'password': os.getenv('PASSWORD')
+    }
     conn = psycopg2.connect(**db_params)
     cursor = conn.cursor()
     query = f"SELECT datetime, storage, elevation FROM res_data WHERE site_no LIKE '{site_no}';"
@@ -53,7 +54,14 @@ def merge_data(storage_df, clim_df):
     return pd.merge(clim_df, storage_df, on='Date', how='inner')
 
 def write_to_db(name, df):
-
+    load_dotenv()
+    db_params = {
+        'user': os.getenv('USER'),
+        "host": os.getenv('HOST'),
+        "dbname": os.getenv('DB_NAME'),
+        "port": os.getenv('PORT'),
+        'password': os.getenv('PASSWORD')
+    }
     conn = psycopg2.connect(**db_params)
     cursor = conn.cursor()
 
@@ -87,6 +95,14 @@ def create_df(lon, lat, site_no, edate):
     return merge_data(storage_df, clim_df)
 
 def drop_table(table_name):
+    load_dotenv()
+    db_params = {
+        'user': os.getenv('USER'),
+        "host": os.getenv('HOST'),
+        "dbname": os.getenv('DB_NAME'),
+        "port": os.getenv('PORT'),
+        'password': os.getenv('PASSWORD')
+    }
     conn = psycopg2.connect(**db_params)
     cursor = conn.cursor()
     drop_query = f"DROP TABLE IF EXISTS {table_name};"

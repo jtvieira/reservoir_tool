@@ -5,19 +5,23 @@ from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 import trainModels
 from sqlalchemy import create_engine
+from dotenv import load_dotenv
+import os
 
 train_start_dt = '2010-01-01'
 test_start_dt = '2023-01-01'
 
-db_params = {
-    'user': '',
-    "host": '',
-    "dbname": 'postgres',
-    "port": '5432',
-    'password': ''
-    }
+
 
 def write_results_to_db(df, reservoir):
+    load_dotenv()
+    db_params = {
+        'user': os.getenv('USER'),
+        "host": os.getenv('HOST'),
+        "dbname": os.getenv('DB_NAME'),
+        "port": os.getenv('PORT'),
+        'password': os.getenv('PASSWORD')
+    }
     connection_parts = ["postgresql://"]
 
     if db_params["user"]:
@@ -40,7 +44,14 @@ def write_results_to_db(df, reservoir):
 
 
 def get_data(res):
-    
+    load_dotenv()
+    db_params = {
+        'user': os.getenv('USER'),
+        "host": os.getenv('HOST'),
+        "dbname": os.getenv('DB_NAME'),
+        "port": os.getenv('PORT'),
+        'password': os.getenv('PASSWORD')
+    }
     conn = psycopg2.connect(**db_params)
     cursor = conn.cursor()
     query = f"SELECT * FROM {res};"

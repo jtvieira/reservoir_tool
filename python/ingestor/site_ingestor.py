@@ -4,14 +4,6 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 
-db_params = {
-    # "dbname": os.getenv('DB_NAME'),
-    # "host": os.getenv('HOST'),
-    # "port": os.getenv('PORT'),
-    "dbname": 'postgres',
-    # "host": 'postgres',
-    "port": '5432',
-}
 
 
 def get_dfs(state):
@@ -44,6 +36,14 @@ def get_dfs(state):
     return df_meta, merged_data_df
 
 def drop_table(table_name):
+    load_dotenv()
+    db_params = {
+        'user': os.getenv('USER'),
+        "host": os.getenv('HOST'),
+        "dbname": os.getenv('DB_NAME'),
+        "port": os.getenv('PORT'),
+        'password': os.getenv('PASSWORD')
+    }
     conn = psycopg2.connect(**db_params)
     cursor = conn.cursor()
     drop_query = f"DROP TABLE IF EXISTS {table_name};"
@@ -54,6 +54,14 @@ def drop_table(table_name):
     conn.close()
 
 def insert_meta(df):
+    load_dotenv()
+    db_params = {
+        'user': os.getenv('USER'),
+        "host": os.getenv('HOST'),
+        "dbname": os.getenv('DB_NAME'),
+        "port": os.getenv('PORT'),
+        'password': os.getenv('PASSWORD')
+    }
     conn = psycopg2.connect(**db_params)
     cursor = conn.cursor()
 
@@ -96,6 +104,14 @@ def insert_meta(df):
 
 
 def insert_data(df):
+    load_dotenv()
+    db_params = {
+        'user': os.getenv('USER'),
+        "host": os.getenv('HOST'),
+        "dbname": os.getenv('DB_NAME'),
+        "port": os.getenv('PORT'),
+        'password': os.getenv('PASSWORD')
+    }
     conn = psycopg2.connect(**db_params)
     cursor = conn.cursor()
 
