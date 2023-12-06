@@ -6,7 +6,6 @@ import numpy as np
 import trainModels
 from sqlalchemy import create_engine
 
-reservoir = ''
 train_start_dt = '2010-01-01'
 test_start_dt = '2023-01-01'
 
@@ -18,7 +17,7 @@ db_params = {
     'password': ''
     }
 
-def write_results_to_db(df):
+def write_results_to_db(df, reservoir):
     connection_parts = ["postgresql://"]
 
     if db_params["user"]:
@@ -41,10 +40,7 @@ def write_results_to_db(df):
 
 
 def get_data(res):
-    global reservoir
-    reservoir = res
     
-
     conn = psycopg2.connect(**db_params)
     cursor = conn.cursor()
     query = f"SELECT * FROM {res};"
@@ -64,7 +60,7 @@ def get_data(res):
     df = df.drop('Date', axis=1)
     return df
 
-def add_14_days_data(df):
+def add_14_days_data(df, reservoir):
     if reservoir == 'havasu':
         df = df.dropna(axis=1) # in the case of havasu, the elevation column is all NaN so we drop that column
 
@@ -92,7 +88,7 @@ def split_to_x_and_y(train, test):
     y_test = test['Storage']
     return X_train, y_train, X_test, y_test
 
-def process_data(X_train, y_train, X_test, y_test):
+def process_data(X_train, y_train, X_test, y_test, reservoir):
     x_scaler = MinMaxScaler()
     y_scaler = MinMaxScaler()
 
@@ -113,15 +109,19 @@ def process_data(X_train, y_train, X_test, y_test):
         results[k] = y_scaler.inverse_transform(results[k])
     results['test'] = y_test_values
     df = pd.DataFrame({k: v.flatten() for k, v in results.items()})
-    write_results_to_db(df)
+    write_results_to_db(df, reservoir)
 
-def main():
-    df = get_data('mohave')
-    df = add_14_days_data(df)
+def main(reservoir):
+    df = get_data(reservoir)
+    df = add_14_days_data(df, reservoir)
     X_train, y_train, X_test, y_test = generate_train_and_test_sets(df)
-    process_data(X_train, y_train, X_test, y_test)
+    process_data(X_train, y_train, X_test, y_test, reservoir)
     # print(test.head())
     # print(df.head())
     # print(train_start_dt)
 
-main()
+if __name__ == '__main__':
+    reservoirs = ['havasu', 'mohave']
+    for res in reservoirs:
+        print(f'analyzing data for {res}')
+        main(res)

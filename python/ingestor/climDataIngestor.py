@@ -3,6 +3,7 @@ import json
 import pandas as pd
 import psycopg2
 
+
 db_params = {
     # "dbname": os.getenv('DB_NAME'),
     # "host": os.getenv('HOST'),
@@ -20,17 +21,17 @@ db_params = {
 
 
 # This makes a call to an external api that gets the historical data
-def get_climate_data_at_lon_lat(lon, lat):
+def get_climate_data_at_lon_lat(lon, lat, edate):
 
-    params_lkhav = {"loc":"{}, {}\t".format(lon,lat),"grid":"21","elems":[{"name":"avgt","interval":"dly","duration":"dly"},{"name":"pcpn","interval":"dly","duration":"dly"}],"sdate":"20100101","edate":"20231031"}
+    params = {"loc":"{}, {}\t".format(lon,lat),"grid":"21","elems":[{"name":"avgt","interval":"dly","duration":"dly"},{"name":"pcpn","interval":"dly","duration":"dly"}],"sdate":"20100101","edate":f"{edate}"}
     url = 'https://data.rcc-acis.org/GridData'
-    data = requests.post(url, data=json.dumps(params_lkhav), headers={'content-type': 'application/json'}, timeout=60)
+    data = requests.post(url, data=json.dumps(params), headers={'content-type': 'application/json'}, timeout=60)
     return data.json()
 
 
-def get_clim_df(lon, lat):
+def get_clim_df(lon, lat, edate):
 
-    data = get_climate_data_at_lon_lat(lon, lat)
+    data = get_climate_data_at_lon_lat(lon, lat, edate)
     res = data['data']    
     return pd.DataFrame(res, columns=['Date', 'Avg Temp', 'Precip'])
 
@@ -80,8 +81,8 @@ def write_to_db(name, df):
     cursor.close()
     conn.close()
 
-def create_df(lon, lat, site_no):
-    clim_df = get_clim_df(lon, lat)
+def create_df(lon, lat, site_no, edate):
+    clim_df = get_clim_df(lon, lat, edate)
     storage_df = get_storage_and_elevation_df_from_siteno(site_no)
     return merge_data(storage_df, clim_df)
 
@@ -104,8 +105,9 @@ def main():
         "latitudes"     : [35.19722105, 34.31612564],
         'site_no'       : ['09422500', '09427500']  
     }
+    edate = '20231031'
     for i in range(0,2):
-        df = create_df(site_meta_data['longitudes'][i], site_meta_data['latitudes'][i], site_meta_data['site_no'][i])
+        df = create_df(site_meta_data['longitudes'][i], site_meta_data['latitudes'][i], site_meta_data['site_no'][i], edate)
         print(df.head())
         drop_table(site_meta_data['names'][i]) #Don't want duplicate data every time we ingest. We will just drop the table every time we gather the data
         write_to_db(site_meta_data['names'][i], df)

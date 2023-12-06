@@ -1,0 +1,96 @@
+<!-- pages/templates/pages/home.html -->
+<!-- pages/templates/pages/home.html -->
+
+
+{% block page_content %}
+	<h1>Lake Havasu and Mohave Reservoir Tool</h1>
+	<div class="row">
+    	<div class="col">
+			<label>Reservoirs: <label>
+				<select id="res_sel">
+					<option value="-1">Select a Reservoir</option>
+					<option value="havasu">Lake Havasu</option>
+                    <option value="mohave">Lake Mohave</option>
+					
+				</select>
+    	</div>
+	</div>
+	<h2>Real Time Historical Analysis</h2>
+	<div class="row">
+    	<div class="col">
+			<div class="container-fluid" id="res_graph">
+		</div>
+	</div>
+	<div class="row">
+    	<div class="col">
+			<div class="container-fluid" id="svr">
+		</div>
+	</div>
+	<div class="row">
+    	<div class="col">
+			<div class="container-fluid" id="kneighbors">
+		</div>
+	</div>
+	<div class="row">
+    	<div class="col">
+			<div class="container-fluid" id="neural_net">
+		</div>
+	</div>
+	<div class="row">
+    	<div class="col">
+			<div class="container-fluid" id="decision_tree">
+		</div>
+	</div>
+	<div class="row">
+    	<div class="col">
+			<div class="container-fluid" id="random_forest">
+		</div>
+	</div>
+	<div class="row">
+    	<div class="col">
+			<div class="container-fluid" id="gaussian">
+		</div>
+	</div>
+{% endblock page_content %}
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+crossorigin=""></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+	
+	console.log('here');
+
+	$(document).ready(function() {
+	$("#res_sel").change(function () {
+		
+		var res = $("#res_sel").val();
+		console.log(res);
+		$.ajax({
+			type: "GET",
+			url: '{% url "get_info" %}',
+			contentType: "application/json",
+			data: {
+				'res': res
+			},
+			success: function (data) {
+				console.log(data);
+				$("#res_graph").html(data['rti_plot']);
+				$("#svr").html(data['svr']);
+				$("#kneighbors").html(data['kneighbors']);
+				$("#neural_net").html(data['neural_net']);
+				$("#decision_tree").html(data['decision_tree']);
+				$("#random_forest").html(data['random_forest']);
+				$("#gaussian").html(data['gaussian']);
+			}
+			});
+	});
+	
+
+	});
+</script>
+{% endblock javascript %}
