@@ -8,10 +8,22 @@ For installation instructions on windows, see here  : https://www.postgresqltuto
 For installation instructions on linux, see here    : https://www.postgresqltutorial.com/postgresql-getting-started/install-postgresql-linux/
 
 The python packages for this project are listed in requirements.txt
+This project also requires port 8000 to be free. Ensure that nothing is running on port 8000
 
-There is a shell script called installPackages.sh
-    Running this will create a new virtual environment and install all packages there
+### Collecting Data and Running project
 
-### Collecting Data
+There is a script called run.sh in the root directory of the project. It may be necessary to modify the permission of this file to turn it into an executable.
+To do this, run chmod +x run.sh in the command line. 
 
-Run the collectData.sh script that is in the root directory of the project. This should create postgres databases with all of the information needed
+#### Update DB Credentials in the .env file
+For simplicity sake, I have included the .env file in this repository. While not a best practice, it is simpler this way. Enter your database credentials into here.
+
+#### First run
+If this is your first time running the project, you will need to ingest the data, install packages, train ML models, etc. 
+run.sh will handle all of this if you include the -I flag. Run:
+    ./run.sh -I
+
+#### Subsequent runs
+Because the majority of the required data is stored in a postgres database, every subsequent run of this project can be done by running:
+    ./run.sh
+You'll notice no flags. That is all that needs to be done
