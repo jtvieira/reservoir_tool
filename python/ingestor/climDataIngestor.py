@@ -4,7 +4,7 @@ import pandas as pd
 import psycopg2
 from dotenv import load_dotenv
 import os
-
+from datetime import datetime
 
 # mohave lat = 35.19722105
 # mohave lon = -114.5694098
@@ -122,7 +122,10 @@ def main():
         "latitudes"     : [35.19722105, 34.31612564],
         'site_no'       : ['09422500', '09427500']  
     }
-    edate = '20231208'
+
+    date = str(datetime.now().date())
+    date = date.split('-')
+    edate = ''.join(date)
     for i in range(0,2):
         df = create_df(site_meta_data['longitudes'][i], site_meta_data['latitudes'][i], site_meta_data['site_no'][i], edate)
         print(df.head())
