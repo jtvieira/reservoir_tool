@@ -10,7 +10,7 @@ import os
 
 train_start_dt = '2010-01-01'
 test_start_dt = '2023-01-01'
-
+test_end_dt = '2023-10-31'
 
 
 def write_results_to_db(df, reservoir):
@@ -88,7 +88,7 @@ def add_14_days_data(df, reservoir):
 
 def generate_train_and_test_sets(df):
     train = df.copy()[(df.index >= train_start_dt) & (df.index < test_start_dt)]
-    test = df.copy()[df.index >= test_start_dt]
+    test = df.copy()[(df.index >= test_start_dt) & (df.index <= test_end_dt)]
     return split_to_x_and_y(train, test)
 
 def split_to_x_and_y(train, test):

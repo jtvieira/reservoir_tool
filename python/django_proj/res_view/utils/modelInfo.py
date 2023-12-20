@@ -62,9 +62,6 @@ def generate_plot(df, col):
     ]
 
     fig.update_layout(annotations=annotations)  
-    # Show the figure
-    # pyo.iplot(fig)
-    # fig.show()
     return pyo.plot(fig, output_type='div')
 
 def get_df(res):

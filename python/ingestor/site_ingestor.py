@@ -32,7 +32,6 @@ def get_dfs(state):
     df_data = df_data[~(df_data['storage'].str.contains('00054') | (df_data['storage'] == '14n'))]
     merged_data_df = pd.merge(df_data, df_data_el, on=['site_no', 'datetime'], how='left')
     
-    
     return df_meta, merged_data_df
 
 def drop_table(table_name):
